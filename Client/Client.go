@@ -2,9 +2,10 @@ package main
 
 import (
 	"bufio"
+	"crypto/rand"
 	"crypto/tls"
 	"log"
-	"math/rand/v2"
+	"math/big"
 	"net"
 	"os"
 	"strconv"
@@ -19,7 +20,13 @@ func shareGenerator(secret, NOS int) []int {
 	leftoverShare := secret
 
 	for i := 0; i < NOS-1; i++ {
-		random := rand.IntN(leftoverShare)
+		random_big, err := rand.Int(rand.Reader, big.NewInt(int64(leftoverShare)))
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+		random := int(random_big.Int64())
+
 		leftoverShare -= random
 		share[i] = random
 	}
@@ -35,15 +42,15 @@ var mutex sync.Mutex
 
 func main() {
 	args := os.Args[1:]
-	cert := args[0]+".crt"
-	key := args[0]+".key"
+	cert := args[0] + ".crt"
+	key := args[0] + ".key"
 	ports := strings.Split(args[3], ",")
 	secret, err := strconv.Atoi(args[2])
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	Entry(cert, key, args[1], secret , ports)
+	Entry(cert, key, args[1], secret, ports)
 
 	for {
 
@@ -51,11 +58,11 @@ func main() {
 }
 
 func Entry(certName, keyName, clientPort string, secret int, ports []string) {
-	
+
 	shares = shareGenerator(secret, len(ports)+1)
 
 	for _, share := range shares {
-		log.Println(clientPort,share)
+		log.Println(clientPort, share)
 	}
 
 	computations = append(computations, shares[0])
@@ -69,7 +76,7 @@ func Entry(certName, keyName, clientPort string, secret int, ports []string) {
 	config := &tls.Config{Certificates: []tls.Certificate{cer}}
 
 	go listener(config, clientPort)
-	
+
 	time.Sleep(1 * time.Second)
 	for i, port := range ports {
 		ch := make(chan bool)
@@ -78,7 +85,7 @@ func Entry(certName, keyName, clientPort string, secret int, ports []string) {
 		//log.Println(clientPort,port,strconv.Itoa(share))
 		go dialer(config, port, ch, share)
 	}
-	
+
 }
 
 func hospitalHandler(conn net.Conn) {
@@ -100,7 +107,7 @@ func hospitalHandler(conn net.Conn) {
 			}
 			returnedComputations = []int{}
 
-			conn.Write([]byte(strconv.Itoa(sum)+"\n"))
+			conn.Write([]byte(strconv.Itoa(sum) + "\n"))
 			break
 		}
 		time.Sleep(2 * time.Second)
@@ -144,9 +151,9 @@ func dialer(config *tls.Config, port string, ch chan bool, share int) {
 		}
 		time.Sleep(2 * time.Second)
 	}
-	
-	conn.Write([]byte(strconv.Itoa(share)+"\n"))
-	
+
+	conn.Write([]byte(strconv.Itoa(share) + "\n"))
+
 	for {
 		accept := <-ch
 		if accept {
@@ -156,7 +163,7 @@ func dialer(config *tls.Config, port string, ch chan bool, share int) {
 			}
 			if sum_share != 0 {
 				log.Println("sending sum to client", sum_share, port)
-				conn.Write([]byte(strconv.Itoa(sum_share)+"\n"))
+				conn.Write([]byte(strconv.Itoa(sum_share) + "\n"))
 			}
 			break
 		}
@@ -185,12 +192,12 @@ func listener(config *tls.Config, port string) {
 			return
 		}
 		if msg == "go\n" {
-			log.Println("Hospital connected"+port)
+			log.Println("Hospital connected" + port)
 			go hospitalHandler(conn)
-			} else {
-				log.Println("Client connected" + port)
-				log.Println("Message received:",msg)
-				msg = strings.Trim(msg, "\n")
+		} else {
+			log.Println("Client connected" + port)
+			log.Println("Message received:", msg)
+			msg = strings.Trim(msg, "\n")
 
 			value, err := strconv.Atoi(msg)
 			if err != nil {

@@ -9,6 +9,7 @@ $ openssl req -new -x509 -addext "subjectAltName = DNS:localhost" -sha256 -key h
 ```
 ### MAKE SURE TO ADD THE CERTIFICATE AS A TRUSTED CERT ON YOUR MACHINE
 You are smart I'm sure you can google how to do this on your OS and machine
+For testing the program you can use the same cert for all clients and the hospital but keep in mind for real world use-case you would want to use a separate cert key combo for each client and the hospital
 
 ## Behind the program
 This is a peer to peer MPC example.  

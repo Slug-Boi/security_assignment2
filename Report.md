@@ -1,0 +1,12 @@
+> 1) Reflect on this scenario in the context of the GDPR: What are the potential issues in having the hospital store plaintext private data provided by patients even if they have consented to participate on the experiment and have their data processed? Would these issues be solved by removing the patients' names from their data before storing it?  What are the remaining risks in using Federated Learning with Secure Aggregation as suggested?
+
+Storing private data in plaintext is of course a risk on the case that an adversary/attacker breaks into our system and gets access to our servers and databases. This data would be easy to extract and sell or whatever their motive may be with it. Even if you say yes to having your info used you would probably at least expect it to not just be sitting in plaintext ready to be grabbed.
+
+Removing patient names is not enough, just like a browser fingerprint can be used to identify an individual based on data gathered by websites on a webbrowser there is many more things that could be used to identify a person based purely on data even without a name. This would undoubtedly end up with some violation of data privacy laws if a company got caught doing this. 
+
+Remaining risks....
+
+
+>2) Design and implement a solution that allows for the 3 patients and the Hospital in the scenario above to compute an aggregate value of the patients' private input values in such a way that the Hospital only learns this aggregate value and no patient learns anything besides their own private inputs. Your protocol must also ensure confidentiality and integrity of the data against external attackers. Consider that all individual values held by patients are integers in a range [0,...,R] and that the aggregated value is the sum of all individual values, which is also assumed to be in the same range. You must describe an adversarial model (or threat model) capturing the attacks by an adversary who behaves according to the scenario described above, explain how your solution works and why it guarantees security against such an adversary. 
+
+In the project folder an implementation of a MPC (multi party computation) scheme using TLS to send messages between clients. The implementation is written in Go (language is built for this sorta stuff) using the base crypto TLS and Random number packages. 

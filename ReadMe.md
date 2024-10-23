@@ -34,3 +34,6 @@ e.g.
 ```bash
 $ go run ./Hospital.go "hospital" "8080,8081,8082"
 ```
+
+### Small note
+The pdf is in this folder since learnit wouldn't accept pdf file format so I had to put it in the same folder as the code. I hope this is not a problem :)
